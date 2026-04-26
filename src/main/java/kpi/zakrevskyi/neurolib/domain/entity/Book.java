@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,13 +27,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "books")
+@AllArgsConstructor
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
