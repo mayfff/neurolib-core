@@ -1,8 +1,10 @@
 package kpi.zakrevskyi.neurolib.domain.dto.response;
 
 public record AuthResponseDto(
-    String token,
+    String accessToken,
     String tokenType,
-    long expiresInMs
+    long accessTokenExpiresInMs,
+    String refreshToken,
+    long refreshTokenExpiresInMs
 ) {
 }

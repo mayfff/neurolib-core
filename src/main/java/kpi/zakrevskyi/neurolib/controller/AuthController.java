@@ -2,6 +2,7 @@ package kpi.zakrevskyi.neurolib.controller;
 
 import jakarta.validation.Valid;
 import kpi.zakrevskyi.neurolib.domain.dto.request.LoginRequestDto;
+import kpi.zakrevskyi.neurolib.domain.dto.request.RefreshTokenRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.RegisterRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthResponseDto;
 import kpi.zakrevskyi.neurolib.service.AuthService;
@@ -28,5 +29,10 @@ public class AuthController {
     @PostMapping("/sign-in")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 }
