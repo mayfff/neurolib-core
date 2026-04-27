@@ -18,12 +18,6 @@ public interface UserMapper {
     @Mapping(target = "savedBookIds", source = "savedBooks")
     UserResponseDto toDto(User user);
 
-    @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "likedBooks", source = "likedBookIds")
-    @Mapping(target = "dislikedBooks", source = "dislikedBookIds")
-    @Mapping(target = "savedBooks", source = "savedBookIds")
-    User toEntity(UserResponseDto userResponseDto);
-
     default Set<UUID> mapBooksToIds(Set<Book> books) {
         if (books == null || books.isEmpty()) {
             return Collections.emptySet();

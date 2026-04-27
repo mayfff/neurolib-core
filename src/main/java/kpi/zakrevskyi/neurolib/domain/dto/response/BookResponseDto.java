@@ -9,10 +9,14 @@ public record BookResponseDto(
     String title,
     String description,
     String coverImageUrl,
-    GenreResponseDto genre,
+    UUID genreId,
     String pdfUrl,
     Integer publicationYear,
     LocalDateTime createdAt,
-    Set<AuthorResponseDto> authors
+    Set<UUID> authorIds,
+    Set<UUID> commentIds,
+    Set<UUID> likedUserIds,
+    Set<UUID> dislikedUserIds,
+    Set<UUID> savedUserIds
 ) {
 }

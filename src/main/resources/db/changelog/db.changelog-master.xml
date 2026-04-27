@@ -7,6 +7,8 @@
 
     <include file="db/changelog/changes/001-init-schema.xml"/>
     <include file="db/changelog/changes/002-added-username.xml"/>
-    <include file="/db/changelog/changes/003-jwt-refresh-token.xml"/>
+    <include file="db/changelog/changes/003-jwt-refresh-token.xml"/>
+    <include file="db/changelog/changes/004-comments-change.xml"/>
+    <include file="db/changelog/changes/005-remove-author-bio.xml"/>
 
 </databaseChangeLog>

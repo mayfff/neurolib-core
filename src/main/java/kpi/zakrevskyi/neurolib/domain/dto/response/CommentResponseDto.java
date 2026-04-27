@@ -8,7 +8,6 @@ public record CommentResponseDto(
     UUID bookId,
     UUID userId,
     String text,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    LocalDateTime createdAt
 ) {
 }

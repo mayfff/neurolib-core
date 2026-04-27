@@ -15,10 +15,6 @@ public interface CommentMapper {
     @Mapping(target = "userId", source = "user.id")
     CommentResponseDto toDto(Comment comment);
 
-    @Mapping(target = "book", source = "bookId")
-    @Mapping(target = "user", source = "userId")
-    Comment toEntity(CommentResponseDto commentResponseDto);
-
     default Book mapBook(UUID id) {
         if (id == null) {
             return null;

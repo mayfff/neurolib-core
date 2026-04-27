@@ -1,17 +1,7 @@
 package kpi.zakrevskyi.neurolib.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,6 +53,18 @@ public class Book {
         inverseJoinColumns = @JoinColumn(name = "author_id")
     )
     private Set<Author> authors = new HashSet<>();
+
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private Set<Comment> comments = new HashSet<>();
+
+    @ManyToMany(mappedBy = "likedBooks")
+    private Set<User> likes = new HashSet<>();
+
+    @ManyToMany(mappedBy = "dislikedBooks")
+    private Set<User> dislikes = new HashSet<>();
+
+    @ManyToMany(mappedBy = "savedBooks")
+    private Set<User> savedBy = new HashSet<>();
 
     @PrePersist
     public void prePersist() {
