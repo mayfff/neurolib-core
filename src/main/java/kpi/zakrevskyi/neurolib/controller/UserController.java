@@ -11,6 +11,7 @@ import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
 import kpi.zakrevskyi.neurolib.service.mappers.BookMapper;
 import kpi.zakrevskyi.neurolib.service.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +32,13 @@ public class UserController {
     private final UserMapper userMapper;
     private final BookMapper bookMapper;
 
+    @Operation(summary = "Get user profile by id")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> profile(@PathVariable UUID id) {
         return ResponseEntity.ok(userMapper.toDto(findUserOrThrow(id)));
     }
 
+    @Operation(summary = "Update current user profile")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(
         @PathVariable UUID id,
@@ -51,18 +54,21 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toDto(updatedUser));
     }
 
+    @Operation(summary = "Get liked books of user")
     @GetMapping("/{id}/likes")
     public ResponseEntity<Set<BookResponseDto>> likes(@PathVariable UUID id) {
         User user = findUserOrThrow(id);
         return ResponseEntity.ok(bookMapper.toDtoSet(user.getLikedBooks()));
     }
 
+    @Operation(summary = "Get disliked books of user")
     @GetMapping("/{id}/dislikes")
     public ResponseEntity<Set<BookResponseDto>> dislikes(@PathVariable UUID id) {
         User user = findUserOrThrow(id);
         return ResponseEntity.ok(bookMapper.toDtoSet(user.getDislikedBooks()));
     }
 
+    @Operation(summary = "Get saved books of user")
     @GetMapping("/{id}/saved")
     public ResponseEntity<Set<BookResponseDto>> saved(@PathVariable UUID id) {
         User user = findUserOrThrow(id);

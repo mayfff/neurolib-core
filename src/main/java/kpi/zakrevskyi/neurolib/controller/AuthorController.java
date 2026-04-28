@@ -3,6 +3,7 @@ package kpi.zakrevskyi.neurolib.controller;
 import jakarta.validation.Valid;
 import java.util.Set;
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.Operation;
 import kpi.zakrevskyi.neurolib.domain.dto.request.AuthorRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthorResponseDto;
 import kpi.zakrevskyi.neurolib.service.AuthorService;
@@ -24,21 +25,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthorController {
     private final AuthorService authorService;
 
+    @Operation(summary = "Create new author")
     @PostMapping
     public ResponseEntity<AuthorResponseDto> create(@Valid @RequestBody AuthorRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authorService.create(request));
     }
 
+    @Operation(summary = "Get author by id")
     @GetMapping("/{id}")
     public ResponseEntity<AuthorResponseDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(authorService.getById(id));
     }
 
+    @Operation(summary = "Get all authors")
     @GetMapping
     public ResponseEntity<Set<AuthorResponseDto>> getAll() {
         return ResponseEntity.ok(authorService.getAll());
     }
 
+    @Operation(summary = "Update author by id")
     @PutMapping("/{id}")
     public ResponseEntity<AuthorResponseDto> update(
         @PathVariable UUID id,
@@ -47,6 +52,7 @@ public class AuthorController {
         return ResponseEntity.ok(authorService.update(id, request));
     }
 
+    @Operation(summary = "Delete author by id")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable UUID id) {
         return ResponseEntity.ok(authorService.delete(id));
