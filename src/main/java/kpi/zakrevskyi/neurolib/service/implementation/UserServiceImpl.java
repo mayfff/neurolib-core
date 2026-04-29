@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import kpi.zakrevskyi.neurolib.domain.dto.request.RegisterRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.UpdateUserRequestDto;
+import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.repository.UserRepository;
 import kpi.zakrevskyi.neurolib.service.UserService;
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(registerRequestDto.username());
         user.setPasswordHash(passwordEncoder.encode(registerRequestDto.password()));
         user.setFullName(registerRequestDto.fullName());
+        user.setRole(Role.USER);
 
         return userRepository.save(user);
     }

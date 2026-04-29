@@ -6,6 +6,7 @@ import kpi.zakrevskyi.neurolib.domain.dto.response.UserResponseDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.UpdateUserRequestDto;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.service.UserService;
+import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
 import kpi.zakrevskyi.neurolib.service.exception.NotFoundException;
 import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
 import kpi.zakrevskyi.neurolib.service.mappers.BookMapper;
@@ -47,7 +48,7 @@ public class UserController {
     ) {
         User currentUser = resolveCurrentUser(authentication);
         if (!currentUser.getId().equals(id)) {
-            throw new UnauthorizedException("You can update only your own profile");
+            throw new AccessDeniedException("You can update only your own profile");
         }
 
         User updatedUser = userService.update(id, request);

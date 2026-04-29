@@ -9,6 +9,7 @@ public record UserResponseDto(
     String email,
     String fullName,
     String username,
+    String role,
     String profileImageUrl,
     LocalDateTime createdAt,
     Set<UUID> likedBookIds,

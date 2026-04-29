@@ -6,7 +6,11 @@ import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
 import kpi.zakrevskyi.neurolib.domain.dto.request.BookRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.BookResponseDto;
+import kpi.zakrevskyi.neurolib.domain.entity.Role;
+import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.service.BookService;
+import kpi.zakrevskyi.neurolib.service.UserService;
+import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
 import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +31,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
+    private final UserService userService;
 
     @Operation(summary = "Create new book")
     @PostMapping
-    public ResponseEntity<BookResponseDto> create(@Valid @RequestBody BookRequestDto request) {
+    public ResponseEntity<BookResponseDto> create(
+        @Valid @RequestBody BookRequestDto request,
+        Authentication authentication
+    ) {
+        ensureAdmin(authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(bookService.create(request));
     }
 
@@ -48,13 +57,19 @@ public class BookController {
 
     @Operation(summary = "Update book by id")
     @PutMapping("/{id}")
-    public ResponseEntity<BookResponseDto> update(@PathVariable UUID id, @Valid @RequestBody BookRequestDto request) {
+    public ResponseEntity<BookResponseDto> update(
+        @PathVariable UUID id,
+        @Valid @RequestBody BookRequestDto request,
+        Authentication authentication
+    ) {
+        ensureAdmin(authentication);
         return ResponseEntity.ok(bookService.update(id, request));
     }
 
     @Operation(summary = "Delete book by id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable UUID id) {
+    public ResponseEntity<String> delete(@PathVariable UUID id, Authentication authentication) {
+        ensureAdmin(authentication);
         return ResponseEntity.ok(bookService.delete(id));
     }
 
@@ -83,5 +98,17 @@ public class BookController {
             throw new UnauthorizedException("Unauthorized");
         }
         return authentication.getName();
+    }
+
+    private User resolveCurrentUser(Authentication authentication) {
+        String email = resolveCurrentEmail(authentication);
+        return userService.findByEmail(email).orElseThrow(() -> new UnauthorizedException("Unauthorized"));
+    }
+
+    private void ensureAdmin(Authentication authentication) {
+        User user = resolveCurrentUser(authentication);
+        if (user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException();
+        }
     }
 }

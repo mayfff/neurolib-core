@@ -8,13 +8,14 @@ import kpi.zakrevskyi.neurolib.domain.dto.request.CommentRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.CommentResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Book;
 import kpi.zakrevskyi.neurolib.domain.entity.Comment;
+import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.repository.BookRepository;
 import kpi.zakrevskyi.neurolib.repository.CommentRepository;
 import kpi.zakrevskyi.neurolib.service.CommentService;
 import kpi.zakrevskyi.neurolib.service.UserService;
+import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
 import kpi.zakrevskyi.neurolib.service.exception.NotFoundException;
-import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
 import kpi.zakrevskyi.neurolib.service.mappers.CommentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,8 +62,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         User user = findUserByEmailOrThrow(userEmail);
-        if (!comment.getUser().getId().equals(user.getId())) {
-            throw new UnauthorizedException("You can update only your own comment");
+        if (!comment.getUser().getId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You can update only your own comment");
         }
 
         comment.setText(request.text());
@@ -78,8 +79,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         User user = findUserByEmailOrThrow(userEmail);
-        if (!comment.getUser().getId().equals(user.getId())) {
-            throw new UnauthorizedException("You can delete only your own comment");
+        if (!comment.getUser().getId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You can delete only your own comment");
         }
 
         commentRepository.delete(comment);

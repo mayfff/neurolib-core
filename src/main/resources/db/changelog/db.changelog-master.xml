@@ -10,5 +10,6 @@
     <include file="db/changelog/changes/003-jwt-refresh-token.xml"/>
     <include file="db/changelog/changes/004-comments-change.xml"/>
     <include file="db/changelog/changes/005-remove-author-bio.xml"/>
+    <include file="db/changelog/changes/006-add-user-role.xml"/>
 
 </databaseChangeLog>
