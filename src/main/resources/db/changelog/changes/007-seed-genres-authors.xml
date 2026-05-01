@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="007-seed-genres" author="codex">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM genres</sqlCheck>
+        </preConditions>
+
+        <insert tableName="genres">
+            <column name="id" value="10f5fc67-f905-4d7f-8b01-c8f5eb9d7bd1"/>
+            <column name="title" value="Фентезі"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="7b0fce87-b8ac-4c3d-9c5a-bf57f2ca3f2a"/>
+            <column name="title" value="Наукова фантастика"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="37c85d9f-7f04-45be-a0ff-8f2d1fd6fe0b"/>
+            <column name="title" value="Детектив"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="c370c17d-8a95-4be8-a084-253bcaf5f169"/>
+            <column name="title" value="Трилер"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="3f83ee58-a43b-4870-90ca-5cfcfca63143"/>
+            <column name="title" value="Романтика"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="90c4af84-59f2-4f0d-a339-9c8e930c8608"/>
+            <column name="title" value="Історична проза"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="8d891d36-6c6b-47f4-8254-af7539f43b8d"/>
+            <column name="title" value="Жахи"/>
+        </insert>
+        <insert tableName="genres">
+            <column name="id" value="a5355082-b64f-4850-b3e2-9f6d8d92f8ae"/>
+            <column name="title" value="Нон-фікшн"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="007-seed-authors" author="codex">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM authors</sqlCheck>
+        </preConditions>
+
+        <insert tableName="authors">
+            <column name="id" value="2b6e4f38-29c0-4972-b8df-fcfca626a118"/>
+            <column name="name" value="Дж. Р. Р. Толкін"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="2df6e744-cce9-48f6-8892-b97992aee84f"/>
+            <column name="name" value="Джордж Орвелл"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="9809e0de-8eb1-4de8-b163-00d265f6d584"/>
+            <column name="name" value="Аґата Крісті"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="f6768af2-e5f4-4e2d-b9c2-17a95d7a8140"/>
+            <column name="name" value="Стівен Кінг"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="a4f11b7b-a643-4b56-b069-fd8fe8f8afbe"/>
+            <column name="name" value="Джейн Остін"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="df5962ce-8dbf-4760-af01-98e64f2511da"/>
+            <column name="name" value="Ернест Гемінґвей"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="cdcc4d97-d3e2-43f5-bc53-88caf8fa302f"/>
+            <column name="name" value="Айзек Азімов"/>
+        </insert>
+        <insert tableName="authors">
+            <column name="id" value="01a4c9b0-40a5-4e78-b9f1-71a0156f8f83"/>
+            <column name="name" value="Гарпер Лі"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -11,5 +11,7 @@
     <include file="db/changelog/changes/004-comments-change.xml"/>
     <include file="db/changelog/changes/005-remove-author-bio.xml"/>
     <include file="db/changelog/changes/006-add-user-role.xml"/>
+    <include file="db/changelog/changes/007-seed-genres-authors.xml"/>
+    <include file="db/changelog/changes/008-add-username-unique.xml"/>
 
 </databaseChangeLog>

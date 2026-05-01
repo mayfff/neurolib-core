@@ -15,4 +15,8 @@ public interface UserService {
     Optional<User> findById(UUID id);
 
     User update(UUID id, UpdateUserRequestDto updateUserRequestDto);
+
+    String delete(UUID id);
+
+    String deleteAvatar(UUID id);
 }

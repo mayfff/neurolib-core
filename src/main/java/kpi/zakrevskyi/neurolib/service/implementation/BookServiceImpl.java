@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import kpi.zakrevskyi.neurolib.domain.FileType;
 import kpi.zakrevskyi.neurolib.domain.dto.request.BookRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.BookResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Author;
@@ -12,23 +13,28 @@ import kpi.zakrevskyi.neurolib.domain.entity.Genre;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.repository.AuthorRepository;
 import kpi.zakrevskyi.neurolib.repository.BookRepository;
+import kpi.zakrevskyi.neurolib.repository.CommentRepository;
 import kpi.zakrevskyi.neurolib.repository.GenreRepository;
 import kpi.zakrevskyi.neurolib.service.BookService;
+import kpi.zakrevskyi.neurolib.service.FileStorageService;
 import kpi.zakrevskyi.neurolib.service.UserService;
 import kpi.zakrevskyi.neurolib.service.exception.NotFoundException;
 import kpi.zakrevskyi.neurolib.service.mappers.BookMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
     private final BookRepository bookRepository;
+    private final CommentRepository commentRepository;
     private final GenreRepository genreRepository;
     private final AuthorRepository authorRepository;
     private final UserService userService;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
@@ -41,13 +47,30 @@ public class BookServiceImpl implements BookService {
         Book book = new Book();
         book.setTitle(request.title());
         book.setDescription(request.description());
-        book.setCoverImageUrl(request.coverImageUrl());
         book.setGenre(genre);
-        book.setPdfUrl(request.pdfUrl());
         book.setPublicationYear(request.publicationYear());
         book.setAuthors(authors);
+        Book savedBook = bookRepository.save(book);
 
-        return bookMapper.toDto(bookRepository.save(book));
+        String coverImageUrl = fileStorageService.uploadFile(
+            request.coverImage(),
+            FileType.BOOK_COVER,
+            savedBook.getId().toString()
+        );
+        if (coverImageUrl != null) {
+            savedBook.setCoverImageUrl(coverImageUrl);
+        }
+
+        String pdfUrl = fileStorageService.uploadFile(
+            request.pdfFile(),
+            FileType.BOOK_PDF,
+            savedBook.getId().toString()
+        );
+        if (pdfUrl != null) {
+            savedBook.setPdfUrl(pdfUrl);
+        }
+
+        return bookMapper.toDto(bookRepository.save(savedBook));
     }
 
     @Override
@@ -74,9 +97,23 @@ public class BookServiceImpl implements BookService {
 
         book.setTitle(request.title());
         book.setDescription(request.description());
-        book.setCoverImageUrl(request.coverImageUrl());
+        String storedCoverImageUrl = fileStorageService.uploadFile(
+            request.coverImage(),
+            FileType.BOOK_COVER,
+            book.getId().toString()
+        );
+        if (StringUtils.hasText(storedCoverImageUrl)) {
+            book.setCoverImageUrl(storedCoverImageUrl);
+        }
+        String storedPdfUrl = fileStorageService.uploadFile(
+            request.pdfFile(),
+            FileType.BOOK_PDF,
+            book.getId().toString()
+        );
+        if (StringUtils.hasText(storedPdfUrl)) {
+            book.setPdfUrl(storedPdfUrl);
+        }
         book.setGenre(genre);
-        book.setPdfUrl(request.pdfUrl());
         book.setPublicationYear(request.publicationYear());
         book.setAuthors(authors);
 
@@ -86,9 +123,18 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public String delete(UUID id) {
-        if (!bookRepository.existsById(id)) {
-            throw new NotFoundException("Book with id [%s] not found".formatted(id));
-        }
+        Book book = bookRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Book with id [%s] not found".formatted(id)));
+
+        String ownerId = book.getId().toString();
+        fileStorageService.deleteAllByOwner(FileType.BOOK_COVER, ownerId);
+        fileStorageService.deleteAllByOwner(FileType.BOOK_PDF, ownerId);
+
+        commentRepository.deleteByBookId(id);
+        bookRepository.deleteLikesByBookId(id);
+        bookRepository.deleteDislikesByBookId(id);
+        bookRepository.deleteSavesByBookId(id);
+        bookRepository.deleteBookAuthorsByBookId(id);
         bookRepository.deleteById(id);
         return "Book with id [%s] deleted".formatted(id);
     }

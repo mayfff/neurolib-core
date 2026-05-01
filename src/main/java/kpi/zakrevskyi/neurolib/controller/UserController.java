@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import kpi.zakrevskyi.neurolib.domain.dto.response.BookResponseDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.UserResponseDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.UpdateUserRequestDto;
+import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.service.UserService;
 import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
@@ -15,10 +16,11 @@ import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,10 +42,10 @@ public class UserController {
     }
 
     @Operation(summary = "Update current user profile")
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     public ResponseEntity<UserResponseDto> update(
         @PathVariable UUID id,
-        @Valid @RequestBody UpdateUserRequestDto request,
+        @Valid @ModelAttribute UpdateUserRequestDto request,
         Authentication authentication
     ) {
         User currentUser = resolveCurrentUser(authentication);
@@ -74,6 +76,26 @@ public class UserController {
     public ResponseEntity<Set<BookResponseDto>> saved(@PathVariable UUID id) {
         User user = findUserOrThrow(id);
         return ResponseEntity.ok(bookMapper.toDtoSet(user.getSavedBooks()));
+    }
+
+    @Operation(summary = "Delete user profile")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = resolveCurrentUser(authentication);
+        if (!currentUser.getId().equals(id) && currentUser.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You can delete only your own profile");
+        }
+        return ResponseEntity.ok(userService.delete(id));
+    }
+
+    @Operation(summary = "Delete user avatar")
+    @DeleteMapping("/{id}/avatar")
+    public ResponseEntity<String> deleteAvatar(@PathVariable UUID id, Authentication authentication) {
+        User currentUser = resolveCurrentUser(authentication);
+        if (!currentUser.getId().equals(id) && currentUser.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You can delete only your own avatar");
+        }
+        return ResponseEntity.ok(userService.deleteAvatar(id));
     }
 
     private User findUserOrThrow(UUID id) {

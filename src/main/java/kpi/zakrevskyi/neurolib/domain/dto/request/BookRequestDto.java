@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 public record BookRequestDto(
     @NotBlank
@@ -14,14 +15,12 @@ public record BookRequestDto(
     @Size(max = 5000)
     String description,
 
-    @Size(max = 512)
-    String coverImageUrl,
+    MultipartFile coverImage,
 
     @NotNull
     UUID genreId,
 
-    @Size(max = 1024)
-    String pdfUrl,
+    MultipartFile pdfFile,
 
     @NotNull
     Integer publicationYear,

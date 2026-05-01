@@ -12,6 +12,24 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA}
+    expiration-ms: ${JWT_EXPIRATION_MS:60000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:600000}
+
+  aws:
+    s3:
+      path: ${AWS_S3_PATH}
+      region: ${AWS_REGION:eu-central-1}
+      bucket-name: ${AWS_BUCKET:neurolib}
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 springdoc:
   api-docs:
@@ -24,12 +42,6 @@ springdoc:
 
 server:
   shutdown: graceful
-
-app:
-  jwt:
-    secret: ${JWT_SECRET:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA}
-    expiration-ms: ${JWT_EXPIRATION_MS:60000}
-    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:600000}
 
 logging:
   level:

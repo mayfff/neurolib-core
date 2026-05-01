@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,9 +34,9 @@ public class BookController {
     private final UserService userService;
 
     @Operation(summary = "Create new book")
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<BookResponseDto> create(
-        @Valid @RequestBody BookRequestDto request,
+        @Valid @ModelAttribute BookRequestDto request,
         Authentication authentication
     ) {
         ensureAdmin(authentication);
@@ -56,10 +56,10 @@ public class BookController {
     }
 
     @Operation(summary = "Update book by id")
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     public ResponseEntity<BookResponseDto> update(
         @PathVariable UUID id,
-        @Valid @RequestBody BookRequestDto request,
+        @Valid @ModelAttribute BookRequestDto request,
         Authentication authentication
     ) {
         ensureAdmin(authentication);

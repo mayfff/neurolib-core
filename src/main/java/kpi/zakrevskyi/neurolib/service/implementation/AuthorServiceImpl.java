@@ -53,7 +53,8 @@ public class AuthorServiceImpl implements AuthorService {
         Author author = authorRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Author with id [%s] not found".formatted(id)));
 
-        if (authorRepository.existsByNameIgnoreCase(request.name())) {
+        boolean nameChanged = !author.getName().equalsIgnoreCase(request.name());
+        if (nameChanged && authorRepository.existsByNameIgnoreCase(request.name())) {
             throw new ConflictException("Author with name [%s] already exists".formatted(request.name()));
         }
 
