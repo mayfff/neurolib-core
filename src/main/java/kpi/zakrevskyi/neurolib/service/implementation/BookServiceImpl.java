@@ -15,18 +15,22 @@ import kpi.zakrevskyi.neurolib.repository.AuthorRepository;
 import kpi.zakrevskyi.neurolib.repository.BookRepository;
 import kpi.zakrevskyi.neurolib.repository.CommentRepository;
 import kpi.zakrevskyi.neurolib.repository.GenreRepository;
+import kpi.zakrevskyi.neurolib.service.BookRecommendationService;
 import kpi.zakrevskyi.neurolib.service.BookService;
 import kpi.zakrevskyi.neurolib.service.FileStorageService;
 import kpi.zakrevskyi.neurolib.service.UserService;
+import kpi.zakrevskyi.neurolib.service.exception.BadRequestException;
 import kpi.zakrevskyi.neurolib.service.exception.NotFoundException;
 import kpi.zakrevskyi.neurolib.service.mappers.BookMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
     private final BookRepository bookRepository;
@@ -35,6 +39,7 @@ public class BookServiceImpl implements BookService {
     private final AuthorRepository authorRepository;
     private final UserService userService;
     private final FileStorageService fileStorageService;
+    private final BookRecommendationService bookRecommendationService;
 
     @Override
     @Transactional
@@ -70,7 +75,9 @@ public class BookServiceImpl implements BookService {
             savedBook.setPdfUrl(pdfUrl);
         }
 
-        return bookMapper.toDto(bookRepository.save(savedBook));
+        Book persistedBook = bookRepository.save(savedBook);
+        syncBookRecommendation(persistedBook.getId());
+        return bookMapper.toDto(persistedBook);
     }
 
     @Override
@@ -117,7 +124,9 @@ public class BookServiceImpl implements BookService {
         book.setPublicationYear(request.publicationYear());
         book.setAuthors(authors);
 
-        return bookMapper.toDto(bookRepository.save(book));
+        Book persistedBook = bookRepository.save(book);
+        syncBookRecommendation(persistedBook.getId());
+        return bookMapper.toDto(persistedBook);
     }
 
     @Override
@@ -136,6 +145,7 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteSavesByBookId(id);
         bookRepository.deleteBookAuthorsByBookId(id);
         bookRepository.deleteById(id);
+        removeBookRecommendation(id);
         return "Book with id [%s] deleted".formatted(id);
     }
 
@@ -220,5 +230,21 @@ public class BookServiceImpl implements BookService {
             throw new NotFoundException("One or more authors not found");
         }
         return authors;
+    }
+
+    private void syncBookRecommendation(UUID bookId) {
+        try {
+            bookRecommendationService.upsertBook(bookId);
+        } catch (BadRequestException | NotFoundException ex) {
+            log.warn("Failed to sync book {} to vector store: {}", bookId, ex.getMessage());
+        }
+    }
+
+    private void removeBookRecommendation(UUID bookId) {
+        try {
+            bookRecommendationService.removeBook(bookId);
+        } catch (BadRequestException ex) {
+            log.warn("Failed to remove book {} from vector store: {}", bookId, ex.getMessage());
+        }
     }
 }

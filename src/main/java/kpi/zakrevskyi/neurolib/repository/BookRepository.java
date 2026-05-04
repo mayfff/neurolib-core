@@ -1,6 +1,8 @@
 package kpi.zakrevskyi.neurolib.repository;
 
 import kpi.zakrevskyi.neurolib.domain.entity.Book;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<Book, UUID> {
+    @Query("""
+        SELECT DISTINCT b
+        FROM Book b
+        LEFT JOIN FETCH b.genre
+        LEFT JOIN FETCH b.authors
+        """)
+    List<Book> findAllForRecommendation();
+
+    @Query("""
+        SELECT DISTINCT b
+        FROM Book b
+        LEFT JOIN FETCH b.genre
+        LEFT JOIN FETCH b.authors
+        WHERE b.id = :id
+        """)
+    Optional<Book> findByIdForRecommendation(@Param("id") UUID id);
+
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM user_liked_books WHERE book_id = :bookId", nativeQuery = true)

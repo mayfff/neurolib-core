@@ -16,6 +16,30 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  ai:
+    model:
+      chat: google-genai
+      embedding:
+        text: google-genai
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            model: ${CHAT_MODEL:gemini-2.5-flash}
+        embedding:
+          api-key: ${GEMINI_API_KEY}
+          text:
+            options:
+              model: ${EMBEDDINGS_MODEL:gemini-embedding-2}
+              dimensions: ${EMBEDDINGS_DIMENSIONS:1536}
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        dimensions: ${EMBEDDINGS_DIMENSIONS:1536}
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+
 
 app:
   jwt:
