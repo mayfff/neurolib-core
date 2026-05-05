@@ -1,8 +1,8 @@
 package kpi.zakrevskyi.neurolib.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import kpi.zakrevskyi.neurolib.domain.dto.request.LoginRequestDto;
-import kpi.zakrevskyi.neurolib.domain.dto.request.RefreshTokenRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.RegisterRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthResponseDto;
 import kpi.zakrevskyi.neurolib.service.AuthService;
@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
 
     private final AuthService authService;
@@ -36,7 +38,7 @@ public class AuthController {
 
     @Operation(summary = "Refresh access token using refresh token")
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
-        return ResponseEntity.ok(authService.refresh(request));
+    public ResponseEntity<AuthResponseDto> refresh(@RequestBody @NotBlank String refreshToken) {
+        return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 }

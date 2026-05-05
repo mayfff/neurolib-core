@@ -3,7 +3,6 @@ package kpi.zakrevskyi.neurolib.service.implementation;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import kpi.zakrevskyi.neurolib.domain.dto.request.GenreRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.GenreResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Genre;
 import kpi.zakrevskyi.neurolib.repository.GenreRepository;
@@ -23,13 +22,13 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     @Transactional
-    public GenreResponseDto create(GenreRequestDto request) {
-        if (genreRepository.existsByTitleIgnoreCase(request.title())) {
-            throw new ConflictException("Genre with title [%s] already exists".formatted(request.title()));
+    public GenreResponseDto create(String title) {
+        if (genreRepository.existsByTitleIgnoreCase(title)) {
+            throw new ConflictException("Genre with title [%s] already exists".formatted(title));
         }
 
         Genre genre = new Genre();
-        genre.setTitle(request.title());
+        genre.setTitle(title);
 
         return genreMapper.toDto(genreRepository.save(genre));
     }
@@ -53,16 +52,16 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     @Transactional
-    public GenreResponseDto update(UUID id, GenreRequestDto request) {
+    public GenreResponseDto update(UUID id, String title) {
         Genre genre = genreRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Genre with id [%s] not found".formatted(id)));
 
-        boolean titleChanged = !genre.getTitle().equalsIgnoreCase(request.title());
-        if (titleChanged && genreRepository.existsByTitleIgnoreCase(request.title())) {
-            throw new ConflictException("Genre with title [%s] already exists".formatted(request.title()));
+        boolean titleChanged = !genre.getTitle().equalsIgnoreCase(title);
+        if (titleChanged && genreRepository.existsByTitleIgnoreCase(title)) {
+            throw new ConflictException("Genre with title [%s] already exists".formatted(title));
         }
 
-        genre.setTitle(request.title());
+        genre.setTitle(title);
         return genreMapper.toDto(genreRepository.save(genre));
     }
 

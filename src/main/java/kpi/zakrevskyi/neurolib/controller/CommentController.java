@@ -1,10 +1,10 @@
 package kpi.zakrevskyi.neurolib.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
-import kpi.zakrevskyi.neurolib.domain.dto.request.CommentRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.CommentResponseDto;
 import kpi.zakrevskyi.neurolib.service.CommentService;
 import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/books/{bookId}/comments")
 @RequiredArgsConstructor
+@Validated
 public class CommentController {
 
     private final CommentService commentService;
@@ -33,12 +35,12 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<CommentResponseDto> create(
         @PathVariable UUID bookId,
-        @Valid @RequestBody CommentRequestDto request,
+        @RequestBody @NotBlank @Size(max = 5000) String text,
         Authentication authentication
     ) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(commentService.create(bookId, request, resolveCurrentEmail(authentication)));
+            .body(commentService.create(bookId, text, resolveCurrentEmail(authentication)));
     }
 
     @Operation(summary = "Get all comments for book")
@@ -52,10 +54,10 @@ public class CommentController {
     public ResponseEntity<CommentResponseDto> update(
         @PathVariable UUID bookId,
         @PathVariable UUID commentId,
-        @Valid @RequestBody CommentRequestDto request,
+        @RequestBody @NotBlank @Size(max = 5000) String text,
         Authentication authentication
     ) {
-        return ResponseEntity.ok(commentService.update(bookId, commentId, request, resolveCurrentEmail(authentication)));
+        return ResponseEntity.ok(commentService.update(bookId, commentId, text, resolveCurrentEmail(authentication)));
     }
 
     @Operation(summary = "Delete own comment for book")

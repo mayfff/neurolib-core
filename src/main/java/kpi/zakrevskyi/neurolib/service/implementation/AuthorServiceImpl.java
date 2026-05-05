@@ -3,7 +3,6 @@ package kpi.zakrevskyi.neurolib.service.implementation;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import kpi.zakrevskyi.neurolib.domain.dto.request.AuthorRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthorResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Author;
 import kpi.zakrevskyi.neurolib.repository.AuthorRepository;
@@ -23,9 +22,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional
-    public AuthorResponseDto create(AuthorRequestDto request) {
+    public AuthorResponseDto create(String name) {
         Author author = new Author();
-        author.setName(request.name());
+        author.setName(name);
 
         return authorMapper.toDto(authorRepository.save(author));
     }
@@ -49,16 +48,16 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional
-    public AuthorResponseDto update(UUID id, AuthorRequestDto request) {
+    public AuthorResponseDto update(UUID id, String name) {
         Author author = authorRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Author with id [%s] not found".formatted(id)));
 
-        boolean nameChanged = !author.getName().equalsIgnoreCase(request.name());
-        if (nameChanged && authorRepository.existsByNameIgnoreCase(request.name())) {
-            throw new ConflictException("Author with name [%s] already exists".formatted(request.name()));
+        boolean nameChanged = !author.getName().equalsIgnoreCase(name);
+        if (nameChanged && authorRepository.existsByNameIgnoreCase(name)) {
+            throw new ConflictException("Author with name [%s] already exists".formatted(name));
         }
 
-        author.setName(request.name());
+        author.setName(name);
 
         return authorMapper.toDto(authorRepository.save(author));
     }

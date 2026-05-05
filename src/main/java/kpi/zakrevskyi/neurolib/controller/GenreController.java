@@ -1,10 +1,10 @@
 package kpi.zakrevskyi.neurolib.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
-import kpi.zakrevskyi.neurolib.domain.dto.request.GenreRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.GenreResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/genres")
 @RequiredArgsConstructor
+@Validated
 public class GenreController {
     private final GenreService genreService;
     private final UserService userService;
@@ -36,11 +38,11 @@ public class GenreController {
     @Operation(summary = "Create new genre")
     @PostMapping
     public ResponseEntity<GenreResponseDto> create(
-        @Valid @RequestBody GenreRequestDto request,
+        @RequestBody @NotBlank @Size(max = 100) String title,
         Authentication authentication
     ) {
         ensureAdmin(authentication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(genreService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(genreService.create(title));
     }
 
     @Operation(summary = "Get genre by id")
@@ -59,11 +61,11 @@ public class GenreController {
     @PutMapping("/{id}")
     public ResponseEntity<GenreResponseDto> update(
         @PathVariable UUID id,
-        @Valid @RequestBody GenreRequestDto request,
+        @RequestBody @NotBlank @Size(max = 100) String title,
         Authentication authentication
     ) {
         ensureAdmin(authentication);
-        return ResponseEntity.ok(genreService.update(id, request));
+        return ResponseEntity.ok(genreService.update(id, title));
     }
 
     @Operation(summary = "Delete genre by id")

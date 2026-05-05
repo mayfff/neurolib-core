@@ -4,7 +4,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import kpi.zakrevskyi.neurolib.domain.dto.request.CommentRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.CommentResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Book;
 import kpi.zakrevskyi.neurolib.domain.entity.Comment;
@@ -32,14 +31,14 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto create(UUID bookId, CommentRequestDto request, String userEmail) {
+    public CommentResponseDto create(UUID bookId, String text, String userEmail) {
         Book book = findBookOrThrow(bookId);
         User user = findUserByEmailOrThrow(userEmail);
 
         Comment comment = new Comment();
         comment.setBook(book);
         comment.setUser(user);
-        comment.setText(request.text());
+        comment.setText(text);
 
         return commentMapper.toDto(commentRepository.save(comment));
     }
@@ -55,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto update(UUID bookId, UUID commentId, CommentRequestDto request, String userEmail) {
+    public CommentResponseDto update(UUID bookId, UUID commentId, String text, String userEmail) {
         Comment comment = findCommentOrThrow(commentId);
         if (!comment.getBook().getId().equals(bookId)) {
             throw new NotFoundException("Comment with id [%s] not found for book [%s]".formatted(commentId, bookId));
@@ -66,7 +65,7 @@ public class CommentServiceImpl implements CommentService {
             throw new AccessDeniedException("You can update only your own comment");
         }
 
-        comment.setText(request.text());
+        comment.setText(text);
         return commentMapper.toDto(commentRepository.save(comment));
     }
 

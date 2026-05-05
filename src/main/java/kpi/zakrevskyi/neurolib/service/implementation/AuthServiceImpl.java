@@ -4,7 +4,6 @@ import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.domain.entity.RefreshToken;
 import kpi.zakrevskyi.neurolib.security.JwtService;
 import kpi.zakrevskyi.neurolib.domain.dto.request.LoginRequestDto;
-import kpi.zakrevskyi.neurolib.domain.dto.request.RefreshTokenRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.RegisterRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthResponseDto;
 import kpi.zakrevskyi.neurolib.service.AuthService;
@@ -50,8 +49,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto refresh(RefreshTokenRequestDto refreshTokenRequestDto) {
-        RefreshToken currentRefreshToken = refreshTokenService.validateToken(refreshTokenRequestDto.refreshToken());
+    public AuthResponseDto refresh(String refreshToken) {
+        RefreshToken currentRefreshToken = refreshTokenService.validateToken(refreshToken);
         refreshTokenService.revokeToken(currentRefreshToken);
         return buildAuthResponse(currentRefreshToken.getUser());
     }

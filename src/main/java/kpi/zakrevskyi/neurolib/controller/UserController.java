@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @Operation(summary = "Update current user profile")
-    @PutMapping(value = "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(
         @PathVariable UUID id,
         @Valid @ModelAttribute UpdateUserRequestDto request,

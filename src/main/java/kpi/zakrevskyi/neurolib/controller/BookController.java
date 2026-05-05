@@ -34,7 +34,7 @@ public class BookController {
     private final UserService userService;
 
     @Operation(summary = "Create new book")
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<BookResponseDto> create(
         @Valid @ModelAttribute BookRequestDto request,
         Authentication authentication
@@ -56,7 +56,7 @@ public class BookController {
     }
 
     @Operation(summary = "Update book by id")
-    @PutMapping(value = "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<BookResponseDto> update(
         @PathVariable UUID id,
         @Valid @ModelAttribute BookRequestDto request,
