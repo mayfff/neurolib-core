@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -79,6 +80,9 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "book_id")
     )
     private Set<Book> savedBooks = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<ChatMessage> chatMessages = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

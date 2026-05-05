@@ -39,6 +39,13 @@ spring:
         dimensions: ${EMBEDDINGS_DIMENSIONS:1536}
         index-type: HNSW
         distance-type: COSINE_DISTANCE
+    retry:
+      max-attempts: 5
+      backoff:
+        initial-interval: 1s
+        multiplier: 2
+        max-interval: 20s
+      on-http-codes: 503
 
 
 app:

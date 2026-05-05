@@ -8,6 +8,7 @@ import kpi.zakrevskyi.neurolib.domain.dto.request.RegisterRequestDto;
 import kpi.zakrevskyi.neurolib.domain.dto.request.UpdateUserRequestDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
+import kpi.zakrevskyi.neurolib.repository.ChatMessageRepository;
 import kpi.zakrevskyi.neurolib.repository.CommentRepository;
 import kpi.zakrevskyi.neurolib.repository.UserRepository;
 import kpi.zakrevskyi.neurolib.service.FileStorageService;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
 
@@ -100,6 +102,7 @@ public class UserServiceImpl implements UserService {
         fileStorageService.deleteAllByOwner(FileType.AVATAR, user.getId().toString());
 
         commentRepository.deleteByUserId(id);
+        chatMessageRepository.deleteByUserId(id);
         userRepository.deleteLikedBooksByUserId(id);
         userRepository.deleteDislikedBooksByUserId(id);
         userRepository.deleteSavedBooksByUserId(id);

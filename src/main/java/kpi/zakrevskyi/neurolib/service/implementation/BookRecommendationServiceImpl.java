@@ -6,10 +6,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import kpi.zakrevskyi.neurolib.domain.dto.response.BookRecommendationResponseDto;
-import kpi.zakrevskyi.neurolib.domain.dto.response.BookRecommendationSourceDto;
+import kpi.zakrevskyi.neurolib.domain.dto.response.ChatMessageResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Author;
 import kpi.zakrevskyi.neurolib.domain.entity.Book;
+import kpi.zakrevskyi.neurolib.domain.entity.ChatMessage;
+import kpi.zakrevskyi.neurolib.domain.entity.ChatMessageRole;
+import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.repository.BookRepository;
+import kpi.zakrevskyi.neurolib.repository.ChatMessageRepository;
+import kpi.zakrevskyi.neurolib.repository.UserRepository;
 import kpi.zakrevskyi.neurolib.service.BookRecommendationService;
 import kpi.zakrevskyi.neurolib.service.exception.BadRequestException;
 import kpi.zakrevskyi.neurolib.service.exception.NotFoundException;
@@ -30,15 +35,21 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
     private static final int TOP_K = 3;
 
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final VectorStore vectorStore;
     private final ChatClient chatClient;
 
     public BookRecommendationServiceImpl(
         BookRepository bookRepository,
+        UserRepository userRepository,
+        ChatMessageRepository chatMessageRepository,
         VectorStore vectorStore,
         ChatClient.Builder chatClientBuilder
     ) {
         this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
+        this.chatMessageRepository = chatMessageRepository;
         this.vectorStore = vectorStore;
         this.chatClient = chatClientBuilder.build();
     }
@@ -87,10 +98,13 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
     }
 
     @Override
-    public BookRecommendationResponseDto recommend(String query) {
+    @Transactional
+    public BookRecommendationResponseDto recommend(String query, String userEmail) {
         if (!StringUtils.hasText(query)) {
             throw new BadRequestException("Query must not be blank");
         }
+        User user = findUserByEmailOrThrow(userEmail);
+        saveChatMessage(user, ChatMessageRole.USER, query.trim());
 
         List<Document> matches;
         try {
@@ -105,21 +119,14 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
             throw new BadRequestException("Failed to search recommendations");
         }
 
-        if (matches == null || matches.isEmpty()) {
-            return new BookRecommendationResponseDto(
-                "Не знайшов відповідних книг у каталозі. Уточніть запит: жанр, тему або автора.",
-                List.of()
-            );
-        }
-
         String context = buildContext(matches);
         String answer;
         try {
             answer = chatClient.prompt()
                 .system("""
                     Ти помічник бібліотеки. Рекомендуй книги лише на основі переданого списку.
-                    Відповідай коротко й по суті: 2-5 рекомендацій і чому кожна підходить.
-                    Якщо даних недостатньо, прямо про це скажи.
+                    Відповідай коротко й по суті: декілька рекомендацій і чому кожна підходить.
+                    Якщо даних недостатньо, так і скажи, що на сайті немає необхідної книги.
                     """)
                 .user("""
                     Запит користувача: %s
@@ -130,10 +137,40 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
                 .call()
                 .content();
         } catch (RuntimeException ex) {
-            throw new BadRequestException("Failed to generate recommendations");
+            if (isQuotaExceeded(ex)) {
+                answer = "Досягнуто ліміт запитів до моделі. Спробуйте ще раз приблизно через хвилину.";
+            } else if (isProviderTemporaryLimit(ex)) {
+                answer = "Зараз сервіс рекомендацій перевантажений. Спробуйте ще раз за кілька секунд.";
+            } else {
+                answer = "Тимчасово не вдалося згенерувати рекомендації. Спробуйте ще раз трохи пізніше.";
+                log.error("Помилка генерації рекомендацій для запиту '{}': {}", query, ex.getMessage(), ex);
+            }
+            saveChatMessage(user, ChatMessageRole.ASSISTANT, answer);
+            return new BookRecommendationResponseDto(answer);
         }
 
-        return new BookRecommendationResponseDto(answer, mapSources(matches));
+        saveChatMessage(user, ChatMessageRole.ASSISTANT, answer);
+        return new BookRecommendationResponseDto(answer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponseDto> getHistory(String userEmail) {
+        User user = findUserByEmailOrThrow(userEmail);
+        return chatMessageRepository.findAllByUserIdOrderByCreatedAtAsc(user.getId()).stream()
+            .map(message -> new ChatMessageResponseDto(
+                message.getRole().name(),
+                message.getMessage(),
+                message.getCreatedAt()
+            ))
+            .toList();
+    }
+
+    @Override
+    @Transactional
+    public void clearHistory(String userEmail) {
+        User user = findUserByEmailOrThrow(userEmail);
+        chatMessageRepository.deleteByUserId(user.getId());
     }
 
     private Document toDocument(Book book) {
@@ -171,27 +208,17 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
             .build();
     }
 
-    private List<BookRecommendationSourceDto> mapSources(List<Document> matches) {
-        return matches.stream()
-            .map(document -> new BookRecommendationSourceDto(
-                readMetadata(document, "bookId"),
-                readMetadata(document, "title"),
-                readMetadata(document, "authors"),
-                readMetadata(document, "genre"),
-                readIntMetadata(document)
-            ))
-            .toList();
-    }
-
     private String buildContext(List<Document> matches) {
         return matches.stream()
             .map(document -> """
-                - Назва: %s
+                - BookId: %s
+                  Назва: %s
                   Автори: %s
                   Жанр: %s
                   Рік: %s
                   Опис: %s
                 """.formatted(
+                readMetadata(document, "bookId"),
                 readMetadata(document, "title"),
                 readMetadata(document, "authors"),
                 readMetadata(document, "genre"),
@@ -212,27 +239,55 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
             .collect(Collectors.joining(", "));
     }
 
+    private User findUserByEmailOrThrow(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new NotFoundException("User with email [%s] not found".formatted(userEmail)));
+    }
+
+    private void saveChatMessage(User user, ChatMessageRole role, String text) {
+        ChatMessage message = new ChatMessage();
+        message.setUser(user);
+        message.setRole(role);
+        message.setMessage(text);
+        chatMessageRepository.save(message);
+    }
+
     private String readMetadata(Document document, String key) {
         Object value = document.getMetadata().get(key);
         return value == null ? "" : String.valueOf(value);
     }
 
-    private Integer readIntMetadata(Document document) {
-        Object value = document.getMetadata().get("publicationYear");
-        if (value instanceof Integer integer) {
-            return integer;
-        }
-        if (value instanceof Number number) {
-            return number.intValue();
-        }
-        if (value instanceof String stringValue && StringUtils.hasText(stringValue)) {
-            try {
-                return Integer.parseInt(stringValue);
-            } catch (NumberFormatException ignored) {
-                return null;
+    private boolean isProviderTemporaryLimit(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            String message = current.getMessage();
+            if (StringUtils.hasText(message)) {
+                String lower = message.toLowerCase();
+                boolean overloaded503 = lower.contains("503")
+                    && (lower.contains("high demand") || lower.contains("overloaded"));
+                if (overloaded503) {
+                    return true;
+                }
             }
+            current = current.getCause();
         }
-        return null;
+        return false;
+    }
+
+    private boolean isQuotaExceeded(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            String message = current.getMessage();
+            if (StringUtils.hasText(message)) {
+                String lower = message.toLowerCase();
+                if (lower.contains("429")
+                    && (lower.contains("quota") || lower.contains("rate limit") || lower.contains("too many requests"))) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     @EventListener(ApplicationReadyEvent.class)
