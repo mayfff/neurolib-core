@@ -78,6 +78,20 @@ public class UserController {
         return ResponseEntity.ok(bookMapper.toDtoSet(user.getSavedBooks()));
     }
 
+    @Operation(summary = "Get reading now books of user")
+    @GetMapping("/{id}/reading-now")
+    public ResponseEntity<Set<BookResponseDto>> readingNow(@PathVariable UUID id) {
+        User user = findUserOrThrow(id);
+        return ResponseEntity.ok(bookMapper.toDtoSet(user.getReadingNowBooks()));
+    }
+
+    @Operation(summary = "Get read books of user")
+    @GetMapping("/{id}/read")
+    public ResponseEntity<Set<BookResponseDto>> read(@PathVariable UUID id) {
+        User user = findUserOrThrow(id);
+        return ResponseEntity.ok(bookMapper.toDtoSet(user.getReadBooks()));
+    }
+
     @Operation(summary = "Delete user profile")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable UUID id, Authentication authentication) {

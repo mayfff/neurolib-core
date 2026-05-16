@@ -14,6 +14,8 @@ public record UserResponseDto(
     LocalDateTime createdAt,
     Set<UUID> likedBookIds,
     Set<UUID> dislikedBookIds,
-    Set<UUID> savedBookIds
+    Set<UUID> savedBookIds,
+    Set<UUID> readingNowBookIds,
+    Set<UUID> readBookIds
 ) {
 }

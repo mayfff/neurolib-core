@@ -16,6 +16,8 @@ public interface UserMapper {
     @Mapping(target = "likedBookIds", source = "likedBooks")
     @Mapping(target = "dislikedBookIds", source = "dislikedBooks")
     @Mapping(target = "savedBookIds", source = "savedBooks")
+    @Mapping(target = "readingNowBookIds", source = "readingNowBooks")
+    @Mapping(target = "readBookIds", source = "readBooks")
     UserResponseDto toDto(User user);
 
     default Set<UUID> mapBooksToIds(Set<Book> books) {
@@ -25,23 +27,5 @@ public interface UserMapper {
         return books.stream()
             .map(Book::getId)
             .collect(Collectors.toSet());
-    }
-
-    default Set<Book> mapIdsToBooks(Set<UUID> bookIds) {
-        if (bookIds == null || bookIds.isEmpty()) {
-            return Collections.emptySet();
-        }
-        return bookIds.stream()
-            .map(this::toBook)
-            .collect(Collectors.toSet());
-    }
-
-    default Book toBook(UUID id) {
-        if (id == null) {
-            return null;
-        }
-        Book book = new Book();
-        book.setId(id);
-        return book;
     }
 }

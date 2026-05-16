@@ -91,6 +91,18 @@ public class BookController {
         return ResponseEntity.ok(bookService.toggleSave(id, resolveCurrentEmail(authentication)));
     }
 
+    @Operation(summary = "Toggle reading now on book")
+    @PostMapping("/{id}/toggle-reading-now")
+    public ResponseEntity<BookResponseDto> toggleReadingNow(@PathVariable UUID id, Authentication authentication) {
+        return ResponseEntity.ok(bookService.toggleReadingNow(id, resolveCurrentEmail(authentication)));
+    }
+
+    @Operation(summary = "Toggle read on book")
+    @PostMapping("/{id}/toggle-read")
+    public ResponseEntity<BookResponseDto> toggleRead(@PathVariable UUID id, Authentication authentication) {
+        return ResponseEntity.ok(bookService.toggleRead(id, resolveCurrentEmail(authentication)));
+    }
+
     private String resolveCurrentEmail(Authentication authentication) {
         if (authentication == null
             || !authentication.isAuthenticated()

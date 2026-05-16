@@ -143,6 +143,8 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteLikesByBookId(id);
         bookRepository.deleteDislikesByBookId(id);
         bookRepository.deleteSavesByBookId(id);
+        bookRepository.deleteReadingNowByBookId(id);
+        bookRepository.deleteReadByBookId(id);
         bookRepository.deleteBookAuthorsByBookId(id);
         bookRepository.deleteById(id);
         removeBookRecommendation(id);
@@ -205,6 +207,50 @@ public class BookServiceImpl implements BookService {
         } else {
             book.getSavedBy().add(user);
             user.getSavedBooks().add(book);
+        }
+
+        return bookMapper.toDto(book);
+    }
+
+    @Override
+    @Transactional
+    public BookResponseDto toggleReadingNow(UUID bookId, String userEmail) {
+        Book book = findBookOrThrow(bookId);
+        User user = findUserByEmailOrThrow(userEmail);
+
+        if (book.getReadBy().contains(user)) {
+            book.getReadBy().remove(user);
+            user.getReadBooks().remove(book);
+        }
+
+        if (book.getReadingNowBy().contains(user)) {
+            book.getReadingNowBy().remove(user);
+            user.getReadingNowBooks().remove(book);
+        } else {
+            book.getReadingNowBy().add(user);
+            user.getReadingNowBooks().add(book);
+        }
+
+        return bookMapper.toDto(book);
+    }
+
+    @Override
+    @Transactional
+    public BookResponseDto toggleRead(UUID bookId, String userEmail) {
+        Book book = findBookOrThrow(bookId);
+        User user = findUserByEmailOrThrow(userEmail);
+
+        if (book.getReadingNowBy().contains(user)) {
+            book.getReadingNowBy().remove(user);
+            user.getReadingNowBooks().remove(book);
+        }
+
+        if (book.getReadBy().contains(user)) {
+            book.getReadBy().remove(user);
+            user.getReadBooks().remove(book);
+        } else {
+            book.getReadBy().add(user);
+            user.getReadBooks().add(book);
         }
 
         return bookMapper.toDto(book);

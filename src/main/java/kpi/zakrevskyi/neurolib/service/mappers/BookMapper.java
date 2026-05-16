@@ -21,15 +21,9 @@ public interface BookMapper {
     @Mapping(target = "likedUserIds", source = "likes")
     @Mapping(target = "dislikedUserIds", source = "dislikes")
     @Mapping(target = "savedUserIds", source = "savedBy")
+    @Mapping(target = "readingNowUserIds", source = "readingNowBy")
+    @Mapping(target = "readUserIds", source = "readBy")
     BookResponseDto toDto(Book book);
-
-    @Mapping(target = "genre", source = "genreId")
-    @Mapping(target = "authors", source = "authorIds")
-    @Mapping(target = "comments", source = "commentIds")
-    @Mapping(target = "likes", source = "likedUserIds")
-    @Mapping(target = "dislikes", source = "dislikedUserIds")
-    @Mapping(target = "savedBy", source = "savedUserIds")
-    Book toEntity(BookResponseDto bookResponseDto);
 
     Set<BookResponseDto> toDtoSet(Set<Book> books);
 

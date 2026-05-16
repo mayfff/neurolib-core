@@ -17,6 +17,8 @@ public record BookResponseDto(
     Set<UUID> commentIds,
     Set<UUID> likedUserIds,
     Set<UUID> dislikedUserIds,
-    Set<UUID> savedUserIds
+    Set<UUID> savedUserIds,
+    Set<UUID> readingNowUserIds,
+    Set<UUID> readUserIds
 ) {
 }

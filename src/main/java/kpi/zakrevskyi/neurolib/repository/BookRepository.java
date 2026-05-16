@@ -46,6 +46,16 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
 
     @Modifying
     @Transactional
+    @Query(value = "DELETE FROM user_reading_now_books WHERE book_id = :bookId", nativeQuery = true)
+    void deleteReadingNowByBookId(@Param("bookId") UUID bookId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM user_read_books WHERE book_id = :bookId", nativeQuery = true)
+    void deleteReadByBookId(@Param("bookId") UUID bookId);
+
+    @Modifying
+    @Transactional
     @Query(value = "DELETE FROM book_authors WHERE book_id = :bookId", nativeQuery = true)
     void deleteBookAuthorsByBookId(@Param("bookId") UUID bookId);
 }

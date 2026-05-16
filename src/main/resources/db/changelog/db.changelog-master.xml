@@ -14,5 +14,6 @@
     <include file="db/changelog/changes/007-seed-genres-authors.xml"/>
     <include file="db/changelog/changes/008-add-username-unique.xml"/>
     <include file="db/changelog/changes/009-add-ai-response-messages.xml"/>
+    <include file="db/changelog/changes/010-add-reading-status-books.xml"/>
 
 </databaseChangeLog>

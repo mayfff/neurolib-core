@@ -22,4 +22,8 @@ public interface BookService {
     BookResponseDto toggleDislike(UUID bookId, String userEmail);
 
     BookResponseDto toggleSave(UUID bookId, String userEmail);
+
+    BookResponseDto toggleReadingNow(UUID bookId, String userEmail);
+
+    BookResponseDto toggleRead(UUID bookId, String userEmail);
 }

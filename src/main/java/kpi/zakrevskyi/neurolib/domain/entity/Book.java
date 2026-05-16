@@ -66,6 +66,12 @@ public class Book {
     @ManyToMany(mappedBy = "savedBooks")
     private Set<User> savedBy = new HashSet<>();
 
+    @ManyToMany(mappedBy = "readingNowBooks")
+    private Set<User> readingNowBy = new HashSet<>();
+
+    @ManyToMany(mappedBy = "readBooks")
+    private Set<User> readBy = new HashSet<>();
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

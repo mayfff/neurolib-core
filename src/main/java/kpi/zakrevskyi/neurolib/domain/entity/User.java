@@ -81,6 +81,22 @@ public class User {
     )
     private Set<Book> savedBooks = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "user_reading_now_books",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    private Set<Book> readingNowBooks = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "user_read_books",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    private Set<Book> readBooks = new HashSet<>();
+
     @OneToMany(mappedBy = "user")
     private Set<ChatMessage> chatMessages = new HashSet<>();
 
