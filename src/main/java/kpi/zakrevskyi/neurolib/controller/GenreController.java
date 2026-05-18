@@ -5,9 +5,11 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
+import kpi.zakrevskyi.neurolib.domain.dto.response.BookResponseDto;
 import kpi.zakrevskyi.neurolib.domain.dto.response.GenreResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
+import kpi.zakrevskyi.neurolib.service.BookService;
 import kpi.zakrevskyi.neurolib.service.GenreService;
 import kpi.zakrevskyi.neurolib.service.UserService;
 import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GenreController {
     private final GenreService genreService;
     private final UserService userService;
+    private final BookService bookService;
 
     @Operation(summary = "Create new genre")
     @PostMapping
@@ -55,6 +58,12 @@ public class GenreController {
     @GetMapping
     public ResponseEntity<Set<GenreResponseDto>> getAll() {
         return ResponseEntity.ok(genreService.getAll());
+    }
+
+    @Operation(summary = "Get books by genre")
+    @GetMapping("/{id}/books")
+    public ResponseEntity<Set<BookResponseDto>> getBooksByGenre(@PathVariable UUID id) {
+        return ResponseEntity.ok(bookService.getByGenreId(id));
     }
 
     @Operation(summary = "Update genre by id")

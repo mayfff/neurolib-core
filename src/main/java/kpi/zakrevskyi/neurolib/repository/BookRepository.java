@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<Book, UUID> {
+
     @Query("""
         SELECT DISTINCT b
         FROM Book b
@@ -28,6 +29,41 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
         WHERE b.id = :id
         """)
     Optional<Book> findByIdForRecommendation(@Param("id") UUID id);
+
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        """)
+    List<Book> searchByTitle(@Param("title") String title);
+
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        WHERE b.genre.id = :genreId
+          AND LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        """)
+    List<Book> searchByTitleAndGenre(@Param("title") String title, @Param("genreId") UUID genreId);
+
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        JOIN b.authors a
+        WHERE a.id = :authorId
+          AND LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        """)
+    List<Book> searchByTitleAndAuthor(@Param("title") String title, @Param("authorId") UUID authorId);
+
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        JOIN b.authors a
+        WHERE a.id = :authorId
+          AND b.genre.id = :genreId
+          AND LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        """)
+    List<Book> searchByTitleAndGenreAndAuthor(
+        @Param("title") String title,
+        @Param("genreId") UUID genreId,
+        @Param("authorId") UUID authorId
+    );
+
 
     @Modifying
     @Transactional

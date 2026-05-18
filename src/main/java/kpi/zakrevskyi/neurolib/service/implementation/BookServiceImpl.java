@@ -1,6 +1,7 @@
 package kpi.zakrevskyi.neurolib.service.implementation;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,6 +91,43 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public Set<BookResponseDto> getAll() {
         return bookRepository.findAll().stream()
+            .map(bookMapper::toDto)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<BookResponseDto> search(String title, UUID genreId, UUID authorId) {
+        String safeTitle = (title == null || title.isBlank()) ? "" : title.trim();
+        List<Book> results;
+
+        if (genreId != null && authorId != null) {
+            results = bookRepository.searchByTitleAndGenreAndAuthor(safeTitle, genreId, authorId);
+        } else if (genreId != null) {
+            results = bookRepository.searchByTitleAndGenre(safeTitle, genreId);
+        } else if (authorId != null) {
+            results = bookRepository.searchByTitleAndAuthor(safeTitle, authorId);
+        } else {
+            results = bookRepository.searchByTitle(safeTitle);
+        }
+
+        return results.stream()
+            .map(bookMapper::toDto)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<BookResponseDto> getByGenreId(UUID genreId) {
+        return bookRepository.searchByTitleAndGenre("", genreId).stream()
+            .map(bookMapper::toDto)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<BookResponseDto> getByAuthorId(UUID authorId) {
+        return bookRepository.searchByTitleAndAuthor("", authorId).stream()
             .map(bookMapper::toDto)
             .collect(Collectors.toSet());
     }

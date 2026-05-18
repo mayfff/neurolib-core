@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -53,6 +54,16 @@ public class BookController {
     @GetMapping
     public ResponseEntity<Set<BookResponseDto>> getAll() {
         return ResponseEntity.ok(bookService.getAll());
+    }
+
+    @Operation(summary = "Search books by title, genre, or author")
+    @GetMapping("/search")
+    public ResponseEntity<Set<BookResponseDto>> search(
+        @RequestParam(required = false) String title,
+        @RequestParam(required = false) UUID genreId,
+        @RequestParam(required = false) UUID authorId
+    ) {
+        return ResponseEntity.ok(bookService.search(title, genreId, authorId));
     }
 
     @Operation(summary = "Update book by id")

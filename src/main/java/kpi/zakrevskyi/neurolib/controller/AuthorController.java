@@ -6,9 +6,11 @@ import java.util.Set;
 import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
 import kpi.zakrevskyi.neurolib.domain.dto.response.AuthorResponseDto;
+import kpi.zakrevskyi.neurolib.domain.dto.response.BookResponseDto;
 import kpi.zakrevskyi.neurolib.domain.entity.Role;
 import kpi.zakrevskyi.neurolib.domain.entity.User;
 import kpi.zakrevskyi.neurolib.service.AuthorService;
+import kpi.zakrevskyi.neurolib.service.BookService;
 import kpi.zakrevskyi.neurolib.service.UserService;
 import kpi.zakrevskyi.neurolib.service.exception.AccessDeniedException;
 import kpi.zakrevskyi.neurolib.service.exception.UnauthorizedException;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthorController {
     private final AuthorService authorService;
     private final UserService userService;
+    private final BookService bookService;
 
     @Operation(summary = "Create new author")
     @PostMapping
@@ -55,6 +58,12 @@ public class AuthorController {
     @GetMapping
     public ResponseEntity<Set<AuthorResponseDto>> getAll() {
         return ResponseEntity.ok(authorService.getAll());
+    }
+
+    @Operation(summary = "Get books by author")
+    @GetMapping("/{id}/books")
+    public ResponseEntity<Set<BookResponseDto>> getBooksByAuthor(@PathVariable UUID id) {
+        return ResponseEntity.ok(bookService.getByAuthorId(id));
     }
 
     @Operation(summary = "Update author by id")

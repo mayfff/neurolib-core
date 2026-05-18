@@ -35,6 +35,13 @@ public class UserController {
     private final UserMapper userMapper;
     private final BookMapper bookMapper;
 
+    @Operation(summary = "Get current authenticated user profile")
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> me(Authentication authentication) {
+        User currentUser = resolveCurrentUser(authentication);
+        return ResponseEntity.ok(userMapper.toDto(currentUser));
+    }
+
     @Operation(summary = "Get user profile by id")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> profile(@PathVariable UUID id) {

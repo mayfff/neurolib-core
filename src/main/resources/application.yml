@@ -77,3 +77,5 @@ server:
 logging:
   level:
     org.hibernate: ERROR
+    kpi.zakrevskyi.neurolib.controller.BookRecommendationController: DEBUG
+    kpi.zakrevskyi.neurolib.service.implementation.BookRecommendationServiceImpl: DEBUG

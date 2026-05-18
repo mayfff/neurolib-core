@@ -100,7 +100,9 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
     @Override
     @Transactional
     public BookRecommendationResponseDto recommend(String query, String userEmail) {
+        log.debug("recommend() called — query='{}', user='{}'", query, userEmail);
         if (!StringUtils.hasText(query)) {
+            log.warn("recommend() rejected — query is blank");
             throw new BadRequestException("Query must not be blank");
         }
         User user = findUserByEmailOrThrow(userEmail);

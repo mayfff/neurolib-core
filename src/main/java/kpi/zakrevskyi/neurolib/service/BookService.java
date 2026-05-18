@@ -13,6 +13,12 @@ public interface BookService {
 
     Set<BookResponseDto> getAll();
 
+    Set<BookResponseDto> search(String title, UUID genreId, UUID authorId);
+
+    Set<BookResponseDto> getByGenreId(UUID genreId);
+
+    Set<BookResponseDto> getByAuthorId(UUID authorId);
+
     BookResponseDto update(UUID id, BookRequestDto request);
 
     String delete(UUID id);
@@ -27,3 +33,4 @@ public interface BookService {
 
     BookResponseDto toggleRead(UUID bookId, String userEmail);
 }
+
